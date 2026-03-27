@@ -1,0 +1,35 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Distributed session hub backend",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "start:lb": "node src/load-balancer.js",
+    "dev:lb": "node --watch src/load-balancer.js",
+    "start:node1": "cross-env PORT=3001 NODE_NAME=node-1 node src/server.js",
+    "start:node2": "cross-env PORT=3002 NODE_NAME=node-2 node src/server.js",
+    "start:node3": "cross-env PORT=3003 NODE_NAME=node-3 node src/server.js",
+    "dev:node1": "cross-env PORT=3001 NODE_NAME=node-1 node --watch src/server.js",
+    "dev:node2": "cross-env PORT=3002 NODE_NAME=node-2 node --watch src/server.js",
+    "dev:node3": "cross-env PORT=3003 NODE_NAME=node-3 node --watch src/server.js",
+    "test": "echo \"No tests configured yet\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "connect-redis": "^7.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "http-proxy": "^1.18.1",
+    "redis": "^4.7.1"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0"
+  }
+}
