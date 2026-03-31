@@ -4,9 +4,9 @@ import "./App.css"
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").trim()
 
 const ROUTES = [
-  { id: "/home", label: "Home" },
-  { id: "/login", label: "Login" },
-  { id: "/dashboard", label: "Dashboard" },
+  { id: "/home", label: "⌂ Home" },
+  { id: "/login", label: "⚡ Login" },
+  { id: "/dashboard", label: "◉ Dashboard" },
 ]
 
 function normalizeRoute(hashValue) {
@@ -48,10 +48,134 @@ async function apiRequest(path, options = {}) {
   }
 }
 
+/* ===== SVG Chart Components ===== */
+
+function DonutChart({ segments, size = 140, strokeWidth = 14, centerLabel, centerSub }) {
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const total = segments.reduce((sum, s) => sum + s.value, 0) || 1
+
+  let offset = 0
+
+  return (
+    <div className="donut-chart-wrapper">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {/* Background ring */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="rgba(148,163,184,0.08)"
+          strokeWidth={strokeWidth}
+        />
+        {segments.map((seg, i) => {
+          const segLen = (seg.value / total) * circumference
+          const dashOffset = circumference - offset
+          offset += segLen
+          return (
+            <circle
+              key={i}
+              className="donut-segment"
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke={seg.color}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${segLen} ${circumference - segLen}`}
+              strokeDashoffset={dashOffset}
+              strokeLinecap="round"
+              transform={`rotate(-90 ${size / 2} ${size / 2})`}
+              style={{ filter: `drop-shadow(0 0 4px ${seg.color}40)` }}
+            />
+          )
+        })}
+      </svg>
+      <div className="donut-center-label">
+        <span className="donut-value">{centerLabel}</span>
+        <span className="donut-sub">{centerSub}</span>
+      </div>
+    </div>
+  )
+}
+
+function BarChart({ data, maxHeight = 120 }) {
+  const maxVal = Math.max(...data.map((d) => d.value), 1)
+
+  return (
+    <div className="bar-chart" style={{ height: maxHeight + 30 }}>
+      {data.map((item, i) => (
+        <div className="bar-column" key={i}>
+          <span className="bar-value">{item.value}</span>
+          <div
+            className="bar-fill"
+            style={{
+              height: `${(item.value / maxVal) * maxHeight}px`,
+              background: item.color || "var(--accent-cyan)",
+            }}
+          />
+          <span className="bar-label">{item.label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function GaugeChart({ value, max, size = 130, label, color = "var(--accent-cyan)" }) {
+  const pct = Math.min(value / (max || 1), 1)
+  const radius = (size - 16) / 2
+  const circumference = Math.PI * radius
+  const dash = pct * circumference
+
+  return (
+    <div className="gauge-wrapper">
+      <svg width={size} height={size / 2 + 10} viewBox={`0 0 ${size} ${size / 2 + 10}`}>
+        {/* Background arc */}
+        <path
+          d={`M 8,${size / 2} A ${radius},${radius} 0 0 1 ${size - 8},${size / 2}`}
+          fill="none"
+          stroke="rgba(148,163,184,0.08)"
+          strokeWidth="10"
+          strokeLinecap="round"
+        />
+        {/* Value arc */}
+        <path
+          d={`M 8,${size / 2} A ${radius},${radius} 0 0 1 ${size - 8},${size / 2}`}
+          fill="none"
+          stroke={color}
+          strokeWidth="10"
+          strokeLinecap="round"
+          strokeDasharray={`${dash} ${circumference}`}
+          style={{ filter: `drop-shadow(0 0 6px ${color}60)`, transition: "stroke-dasharray 1s ease" }}
+        />
+        <text x={size / 2} y={size / 2 - 2} textAnchor="middle" fill="var(--text-primary)" fontSize="18" fontWeight="700" fontFamily="Inter">
+          {typeof value === "number" ? value.toFixed(1) : value}
+        </text>
+        <text x={size / 2} y={size / 2 + 12} textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="Inter" textTransform="uppercase">
+          {label}
+        </text>
+      </svg>
+    </div>
+  )
+}
+
+function StatCard({ icon, value, label, color = "cyan" }) {
+  return (
+    <div className={`stat-card ${color}`}>
+      <div className="stat-icon">{icon}</div>
+      <div className="stat-value">{value}</div>
+      <div className="stat-label">{label}</div>
+    </div>
+  )
+}
+
+/* ===== Main Application ===== */
+
 function App() {
   const [route, setRoute] = useState(() => normalizeRoute(window.location.hash))
   const [username, setUsername] = useState("")
-  const [message, setMessage] = useState("Ready")
+  const [message, setMessage] = useState("⚡ System Ready")
   const [messageTone, setMessageTone] = useState("neutral")
   const [loading, setLoading] = useState(false)
   const [escalationOwnerInput, setEscalationOwnerInput] = useState("")
@@ -187,7 +311,7 @@ function App() {
 
       const sessionState = await loadSession()
       setMessage(
-        `Dashboard refreshed from ${dashboardResult.response.headers.get("x-load-balancer-target") || "unknown"}. Session active: ${sessionState?.hasSession ? "yes" : "no"}`,
+        `✓ Dashboard refreshed from ${dashboardResult.response.headers.get("x-load-balancer-target") || "unknown"}. Session active: ${sessionState?.hasSession ? "yes" : "no"}`,
       )
       setMessageTone("success")
     } catch (error) {
@@ -222,7 +346,7 @@ function App() {
       resetUserSessionState()
       await loadSession()
       await refreshDashboard()
-      setMessage("Login successful. New session created and loaded from Redis.")
+      setMessage("✓ Login successful. New session created and loaded from Redis.")
       setMessageTone("success")
       window.location.hash = "/dashboard"
     } catch (error) {
@@ -266,7 +390,7 @@ function App() {
       setLbRemediation(telemetry.remediation)
 
       setMessage(
-        `Target ${targetKey} ${action === "drain" ? "drained" : "restored"} successfully.`,
+        `✓ Target ${targetKey} ${action === "drain" ? "drained" : "restored"} successfully.`,
       )
       setMessageTone("success")
     } catch (error) {
@@ -289,7 +413,7 @@ function App() {
       setLbEscalations(telemetry.escalations)
 
       setMessage(
-        `Escalation ${escalationId} ${action === "acknowledge" ? "acknowledged" : "resolved"} successfully.`,
+        `✓ Escalation ${escalationId} ${action === "acknowledge" ? "acknowledged" : "resolved"} successfully.`,
       )
       setMessageTone("success")
     } catch (error) {
@@ -322,7 +446,7 @@ function App() {
       const telemetry = await refreshLoadBalancerTelemetry()
       setLbEscalations(telemetry.escalations)
 
-      setMessage(`Escalation ${escalationId} assigned to ${owner}.`)
+      setMessage(`✓ Escalation ${escalationId} assigned to ${owner}.`)
       setMessageTone("success")
     } catch (error) {
       setMessage(error.message)
@@ -449,7 +573,56 @@ function App() {
     return `${event.id || "escalation"} is ${event.status || "unknown"}`
   }
 
+  /* ===== Helper: Build chart data from live state ===== */
+
+  function buildTargetBarData() {
+    const targets = lbMetrics?.perTarget || []
+    const colors = ["#00d4ff", "#a855f7", "#10b981", "#f59e0b", "#ec4899", "#3b82f6"]
+    return targets.map((t, i) => ({
+      label: t.key,
+      value: t.selected || 0,
+      color: colors[i % colors.length],
+    }))
+  }
+
+  function buildHealthDonut() {
+    const targets = lbHealth?.targets || []
+    const healthy = targets.filter((t) => t.healthy).length
+    const down = targets.length - healthy
+    return {
+      segments: [
+        { value: healthy, color: "#10b981" },
+        { value: down, color: "#f43f5e" },
+      ],
+      centerLabel: `${healthy}/${targets.length}`,
+      centerSub: "Healthy",
+    }
+  }
+
+  function buildAlertDonut() {
+    const alerts = lbAlerts?.alerts || []
+    const crit = alerts.filter((a) => a.severity === "critical").length
+    const warn = alerts.filter((a) => a.severity === "warning").length
+    const ok = alerts.length - crit - warn
+    return {
+      segments: [
+        { value: ok || 0, color: "#00d4ff" },
+        { value: warn, color: "#f59e0b" },
+        { value: crit, color: "#f43f5e" },
+      ],
+      centerLabel: alerts.length,
+      centerSub: "Alerts",
+    }
+  }
+
+  /* ===== Renderers ===== */
+
   function renderHome() {
+    const healthDonut = buildHealthDonut()
+    const targetBars = buildTargetBarData()
+    const totalReqs = lbMetrics?.totalRequests ?? 0
+    const avgLatency = lbMetrics?.averageLatencyMs ?? 0
+
     return (
       <section className="content-card">
         <h2>Distributed Session Management System</h2>
@@ -458,46 +631,90 @@ function App() {
           session state in Redis so any backend node can serve authenticated traffic.
         </p>
         <p className="arch-line">
-          Client Browser -&gt; Load Balancer -&gt; Node Pool -&gt; Redis Session Store
+          Client Browser → Load Balancer → Node Pool → Redis Session Store
         </p>
 
+        {/* Stats Row */}
+        <div className="stats-row">
+          <StatCard icon="🌐" value={API_BASE || "localhost"} label="Load Balancer" color="cyan" />
+          <StatCard icon="🔒" value={isAuthenticated ? "Active" : "Inactive"} label="Session" color={isAuthenticated ? "green" : "amber"} />
+          <StatCard icon="📊" value={totalReqs} label="Total Requests" color="purple" />
+          <StatCard icon="⚡" value={`${avgLatency} ms`} label="Avg Latency" color="blue" />
+          <StatCard icon="🛡️" value={lbAlerts?.status || "unknown"} label="Op Status" color={lbAlerts?.status === "healthy" ? "green" : "amber"} />
+          <StatCard icon="🔧" value={lbRemediation?.enabled ? "Enabled" : "Disabled"} label="Remediation" color="cyan" />
+        </div>
+
+        {/* Charts */}
+        <div className="charts-grid">
+          <div className="chart-card">
+            <h4>Node Health</h4>
+            <div className="chart-container">
+              <DonutChart
+                segments={healthDonut.segments}
+                centerLabel={healthDonut.centerLabel}
+                centerSub={healthDonut.centerSub}
+                size={150}
+                strokeWidth={16}
+              />
+            </div>
+            <div className="chart-legend">
+              <span className="legend-item"><span className="legend-dot" style={{ background: "#10b981" }} /> Healthy</span>
+              <span className="legend-item"><span className="legend-dot" style={{ background: "#f43f5e" }} /> Down</span>
+            </div>
+          </div>
+
+          {targetBars.length > 0 && (
+            <div className="chart-card">
+              <h4>Traffic Distribution</h4>
+              <BarChart data={targetBars} maxHeight={110} />
+            </div>
+          )}
+
+          <div className="chart-card">
+            <h4>System Performance</h4>
+            <div className="chart-container">
+              <GaugeChart
+                value={avgLatency}
+                max={Math.max(avgLatency * 2, 200)}
+                label="Latency (ms)"
+                color={avgLatency > 100 ? "#f59e0b" : "#00d4ff"}
+                size={140}
+              />
+            </div>
+            <div style={{ textAlign: "center", marginTop: 8 }}>
+              <span className="meta-text">Retries: {lbMetrics?.retryAttempts ?? 0} | Active: {lbMetrics?.activeRequests ?? 0}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Metrics */}
         <div className="metric-grid">
           <article className="metric">
-            <h3>Load Balancer</h3>
-            <p>{API_BASE}</p>
-            <p className="meta-text">
-              Strategy: {lbHealth?.strategy || "unknown"}
-              {lbHealth?.stickySessions ? " + sticky" : ""}
-            </p>
+            <h3>Strategy</h3>
+            <p className="metric-value-cyan">{lbHealth?.strategy || "unknown"}</p>
+            <p className="meta-text">{lbHealth?.stickySessions ? "Sticky sessions enabled" : "No sticky sessions"}</p>
           </article>
           <article className="metric">
             <h3>Session State</h3>
-            <p>{isAuthenticated ? "Active" : "No active session"}</p>
+            <p className={isAuthenticated ? "metric-value-green" : ""}>{isAuthenticated ? "Active" : "No active session"}</p>
             <p className="meta-text">
-              Session ID: {sessionInfo?.sessionId || "not created"}
+              ID: {sessionInfo?.sessionId || "not created"}
             </p>
           </article>
           <article className="metric">
-            <h3>Traffic Metrics</h3>
-            <p>{lbMetrics?.totalRequests ?? 0} requests</p>
-            <p className="meta-text">
-              Retries: {lbMetrics?.retryAttempts ?? 0} | Avg latency: {lbMetrics?.averageLatencyMs ?? 0} ms
-            </p>
+            <h3>Active Alerts</h3>
+            <p className={activeAlertCount > 0 ? "metric-value-red" : "metric-value-green"}>{activeAlertCount}</p>
+            <p className="meta-text">Operational status: {lbAlerts?.status || "unknown"}</p>
           </article>
           <article className="metric">
-            <h3>Operational Status</h3>
-            <p>{lbAlerts?.status || "unknown"}</p>
-            <p className="meta-text">Active alerts: {activeAlertCount}</p>
+            <h3>Incident Events</h3>
+            <p className="metric-value-amber">{recentIncidentCount}</p>
+            <p className="meta-text">Status: {lbIncidents?.status || "unknown"}</p>
           </article>
           <article className="metric">
-            <h3>Incident State</h3>
-            <p>{lbIncidents?.status || "unknown"}</p>
-            <p className="meta-text">Timeline events: {recentIncidentCount}</p>
-          </article>
-          <article className="metric">
-            <h3>Remediation</h3>
-            <p>{lbRemediation?.enabled ? "enabled" : "disabled"}</p>
-            <p className="meta-text">Active drains: {activeDrainCount}</p>
+            <h3>Active Drains</h3>
+            <p className={activeDrainCount > 0 ? "metric-value-red" : "metric-value-green"}>{activeDrainCount}</p>
+            <p className="meta-text">Remediation: {lbRemediation?.enabled ? "enabled" : "disabled"}</p>
           </article>
           <article className="metric">
             <h3>Escalations</h3>
@@ -508,16 +725,14 @@ function App() {
           </article>
           <article className="metric">
             <h3>SLA Breaches</h3>
-            <p>{(lbEscalations?.counters?.responseBreaches ?? 0) + (lbEscalations?.counters?.resolutionBreaches ?? 0)}</p>
+            <p className={((lbEscalations?.counters?.responseBreaches ?? 0) + (lbEscalations?.counters?.resolutionBreaches ?? 0)) > 0 ? "metric-value-red" : "metric-value-green"}>
+              {(lbEscalations?.counters?.responseBreaches ?? 0) + (lbEscalations?.counters?.resolutionBreaches ?? 0)}
+            </p>
             <p className="meta-text">
               response: {lbEscalations?.counters?.responseBreaches ?? 0} | resolution: {lbEscalations?.counters?.resolutionBreaches ?? 0}
             </p>
           </article>
         </div>
-
-        <p className="meta-text">
-          
-        </p>
       </section>
     )
   }
@@ -525,7 +740,7 @@ function App() {
   function renderLogin() {
     return (
       <section className="content-card narrow-card">
-        <h2>Login</h2>
+        <h2>⚡ Login</h2>
         <p>Create a distributed session through the load balancer.</p>
         <form className="login-form" onSubmit={handleLogin}>
           <label htmlFor="username">Username</label>
@@ -538,7 +753,7 @@ function App() {
             autoComplete="off"
           />
           <button type="submit" disabled={loading}>
-            {loading ? "Signing in..." : "Login"}
+            {loading ? "⏳ Signing in..." : "🚀 Login"}
           </button>
         </form>
       </section>
@@ -563,30 +778,35 @@ function App() {
       )
     }
 
+    const healthDonut = buildHealthDonut()
+    const alertDonut = buildAlertDonut()
+    const targetBars = buildTargetBarData()
+
     return (
       <section className="content-card">
         <div className="dashboard-head">
-          <h2>Dashboard</h2>
+          <h2>◉ Dashboard</h2>
           <div className="action-row">
             <button type="button" onClick={refreshDashboard} disabled={loading}>
-              {loading ? "Refreshing..." : "Refresh"}
+              {loading ? "⏳ Refreshing..." : "🔄 Refresh"}
             </button>
             <button type="button" className="ghost-button" onClick={handleLogout}>
-              Logout
+              ⏏ Logout
             </button>
           </div>
         </div>
 
+        {/* === Personal Section === */}
         <div className="dashboard-section personal-section">
-          <h3 className="section-title">User Session Info (personal)</h3>
+          <h3 className="section-title">User Session Info</h3>
           <p className="meta-text section-intro">
-            These cards track your current logged-in session.
+            Your current logged-in session details.
           </p>
 
         <div className="metric-grid metrics-grid-tight">
           <article className="metric">
             <h3>User</h3>
-            <p>{dashboardInfo?.user?.username || sessionInfo?.user?.username || "unknown"}</p>
+            <p className="metric-value-cyan">{dashboardInfo?.user?.username || sessionInfo?.user?.username || "unknown"}</p>
             <p className="meta-text">Login node: {dashboardInfo?.loginNode || sessionInfo?.loginNode || "unknown"}</p>
           </article>
           <article className="metric">
@@ -596,30 +816,83 @@ function App() {
           </article>
           <article className="metric">
             <h3>Served By</h3>
-            <p>{dashboardInfo?.loadBalancerTarget || "refresh to load"}</p>
+            <p className="metric-value-purple">{dashboardInfo?.loadBalancerTarget || "refresh to load"}</p>
             <p className="meta-text">Strategy: {dashboardInfo?.loadBalancerStrategy || "unknown"}</p>
           </article>
         </div>
 
         </div>
 
+        {/* === Telemetry Section === */}
         <div className="dashboard-section telemetry-section">
-          <h3 className="section-title">System Telemetry (global)</h3>
+          <h3 className="section-title">System Telemetry</h3>
           <p className="meta-text section-intro">
-            These metrics are shared across the full system.
+            Real-time metrics across the distributed system.
           </p>
 
+        {/* Charts Row */}
+        <div className="charts-grid">
+          <div className="chart-card">
+            <h4>Node Health Overview</h4>
+            <div className="chart-container">
+              <DonutChart
+                segments={healthDonut.segments}
+                centerLabel={healthDonut.centerLabel}
+                centerSub={healthDonut.centerSub}
+                size={140}
+                strokeWidth={14}
+              />
+            </div>
+            <div className="chart-legend">
+              <span className="legend-item"><span className="legend-dot" style={{ background: "#10b981" }} /> Healthy</span>
+              <span className="legend-item"><span className="legend-dot" style={{ background: "#f43f5e" }} /> Down</span>
+            </div>
+          </div>
+
+          <div className="chart-card">
+            <h4>Alert Severity Breakdown</h4>
+            <div className="chart-container">
+              <DonutChart
+                segments={alertDonut.segments}
+                centerLabel={alertDonut.centerLabel}
+                centerSub={alertDonut.centerSub}
+                size={140}
+                strokeWidth={14}
+              />
+            </div>
+            <div className="chart-legend">
+              <span className="legend-item"><span className="legend-dot" style={{ background: "#00d4ff" }} /> OK</span>
+              <span className="legend-item"><span className="legend-dot" style={{ background: "#f59e0b" }} /> Warning</span>
+              <span className="legend-item"><span className="legend-dot" style={{ background: "#f43f5e" }} /> Critical</span>
+            </div>
+          </div>
+
+          {targetBars.length > 0 && (
+            <div className="chart-card">
+              <h4>Per-Target Request Distribution</h4>
+              <BarChart data={targetBars} maxHeight={110} />
+            </div>
+          )}
+        </div>
+
+        {/* Node Health */}
         <h3 className="section-title">Node Health</h3>
         <div className="node-list">
           {(lbHealth?.targets || []).map((target) => (
             <div className="node-row" key={target.key}>
-              <span>{target.key}</span>
-              <span>{target.healthy ? "healthy" : "down"}</span>
+              <span>
+                <span className={`health-dot ${target.healthy ? "healthy" : "down"}`} />
+                {target.key}
+              </span>
+              <span style={{ color: target.healthy ? "var(--accent-green)" : "var(--accent-red)" }}>
+                {target.healthy ? "● healthy" : "✕ down"}
+              </span>
               <span>{target.url}</span>
             </div>
           ))}
         </div>
 
+        {/* Operational Alerts */}
         <h3 className="section-title">Operational Alerts</h3>
         <div className="alert-list">
           {(lbAlerts?.alerts || []).map((alert) => (
@@ -649,6 +922,7 @@ function App() {
           Minimum samples required: {lbAlerts?.minimumSamples ?? "n/a"}.
         </p>
 
+        {/* Incident Timeline */}
         <h3 className="section-title">Incident Timeline</h3>
         <div className="incident-list">
           {(lbIncidents?.history || []).slice(0, 8).map((incident) => (
@@ -691,11 +965,12 @@ function App() {
           </article>
         </div>
 
+        {/* Remediation Controls */}
         <h3 className="section-title">Remediation Controls</h3>
         <div className="metric-grid metrics-grid-tight">
           <article className="metric">
             <h3>Automation</h3>
-            <p>{lbRemediation?.enabled ? "enabled" : "disabled"}</p>
+            <p className={lbRemediation?.enabled ? "metric-value-green" : ""}>{lbRemediation?.enabled ? "enabled" : "disabled"}</p>
             <p className="meta-text">
               Threshold: {lbRemediation?.thresholds?.autoDrainFailureThreshold ?? "n/a"} failures
             </p>
@@ -736,7 +1011,7 @@ function App() {
                   }}
                   disabled={loading}
                 >
-                  {target.drained ? "Restore" : "Drain"}
+                  {target.drained ? "↻ Restore" : "⊘ Drain"}
                 </button>
               </div>
             </article>
@@ -751,6 +1026,7 @@ function App() {
           )}
         </div>
 
+        {/* Remediation Timeline */}
         <h3 className="section-title">Remediation Timeline</h3>
         <div className="remediation-event-list">
           {(lbRemediation?.history || []).slice(0, 8).map((event) => (
@@ -773,6 +1049,7 @@ function App() {
           )}
         </div>
 
+        {/* Escalation Workflow */}
         <h3 className="section-title">Escalation Workflow</h3>
         <div className="metric-grid metrics-grid-tight">
           <article className="metric">
@@ -802,7 +1079,9 @@ function App() {
           </article>
           <article className="metric">
             <h3>SLA Breaches</h3>
-            <p>{(lbEscalations?.counters?.responseBreaches ?? 0) + (lbEscalations?.counters?.resolutionBreaches ?? 0)}</p>
+            <p className={((lbEscalations?.counters?.responseBreaches ?? 0) + (lbEscalations?.counters?.resolutionBreaches ?? 0)) > 0 ? "metric-value-red" : "metric-value-green"}>
+              {(lbEscalations?.counters?.responseBreaches ?? 0) + (lbEscalations?.counters?.resolutionBreaches ?? 0)}
+            </p>
             <p className="meta-text">
               response: {lbEscalations?.counters?.responseBreaches ?? 0} | resolution: {lbEscalations?.counters?.resolutionBreaches ?? 0}
             </p>
@@ -865,7 +1144,7 @@ function App() {
                   }}
                   disabled={loading}
                 >
-                  Acknowledge
+                  ⚡ Acknowledge
                 </button>
               )}
               {activeEscalation.status !== "resolved" && (
@@ -877,7 +1156,7 @@ function App() {
                   }}
                   disabled={loading}
                 >
-                  Resolve
+                  ✓ Resolve
                 </button>
               )}
             </div>
@@ -919,21 +1198,67 @@ function App() {
           )}
         </div>
 
+        {/* LB Metrics */}
         <h3 className="section-title">Load Balancer Metrics</h3>
+
+        <div className="charts-grid">
+          <div className="chart-card">
+            <h4>Latency Gauge</h4>
+            <div className="chart-container">
+              <GaugeChart
+                value={lbMetrics?.averageLatencyMs ?? 0}
+                max={Math.max((lbMetrics?.averageLatencyMs ?? 0) * 2, 200)}
+                label="Avg Latency (ms)"
+                color={(lbMetrics?.averageLatencyMs ?? 0) > 100 ? "#f59e0b" : "#00d4ff"}
+                size={150}
+              />
+            </div>
+          </div>
+
+          {targetBars.length > 0 && (
+            <div className="chart-card">
+              <h4>Target Selection Count</h4>
+              <BarChart data={targetBars} maxHeight={100} />
+            </div>
+          )}
+
+          <div className="chart-card">
+            <h4>Error Distribution</h4>
+            <div className="chart-container">
+              <DonutChart
+                segments={[
+                  { value: lbMetrics?.completedRequests ?? 1, color: "#10b981" },
+                  { value: lbMetrics?.proxyErrors ?? 0, color: "#f43f5e" },
+                  { value: lbMetrics?.retryAttempts ?? 0, color: "#f59e0b" },
+                ]}
+                centerLabel={lbMetrics?.totalRequests ?? 0}
+                centerSub="Total"
+                size={140}
+                strokeWidth={14}
+              />
+            </div>
+            <div className="chart-legend">
+              <span className="legend-item"><span className="legend-dot" style={{ background: "#10b981" }} /> Completed</span>
+              <span className="legend-item"><span className="legend-dot" style={{ background: "#f43f5e" }} /> Errors</span>
+              <span className="legend-item"><span className="legend-dot" style={{ background: "#f59e0b" }} /> Retries</span>
+            </div>
+          </div>
+        </div>
+
         <div className="metric-grid metrics-grid-tight">
           <article className="metric">
             <h3>Total Requests</h3>
-            <p>{lbMetrics?.totalRequests ?? 0}</p>
+            <p className="metric-value-cyan">{lbMetrics?.totalRequests ?? 0}</p>
             <p className="meta-text">Active: {lbMetrics?.activeRequests ?? 0}</p>
           </article>
           <article className="metric">
             <h3>Retries</h3>
-            <p>{lbMetrics?.retryAttempts ?? 0}</p>
+            <p className="metric-value-amber">{lbMetrics?.retryAttempts ?? 0}</p>
             <p className="meta-text">Proxy errors: {lbMetrics?.proxyErrors ?? 0}</p>
           </article>
           <article className="metric">
             <h3>Latency</h3>
-            <p>{lbMetrics?.averageLatencyMs ?? 0} ms</p>
+            <p className="metric-value-purple">{lbMetrics?.averageLatencyMs ?? 0} ms</p>
             <p className="meta-text">Completed: {lbMetrics?.completedRequests ?? 0}</p>
           </article>
         </div>
@@ -948,8 +1273,8 @@ function App() {
           ))}
         </div>
 
-        <p className="meta-text">
-          Failover demo: stop the currently active node process, then press Refresh.
+        <p className="meta-text" style={{ marginTop: 12 }}>
+          💡 Failover demo: stop the currently active node process, then press Refresh.
           The dashboard should continue with the same session id while serving from another node.
         </p>
 
@@ -961,9 +1286,8 @@ function App() {
   return (
     <main className="page-shell">
       <header className="hero-section reveal">
-        <p className="tag"></p>
+        <p className="tag">distributed systems</p>
         <h1>Distributed Session Hub</h1>
-       
       </header>
 
       <nav className="route-nav reveal delay-1" aria-label="Primary">
