@@ -29,7 +29,7 @@ function readJsonSafe(response) {
       }
     })
 }
-
+//here are the all ajax function
 async function apiRequest(path, options = {}) {
   const requestUrl = API_BASE ? `${API_BASE}${path}` : path
   const response = await fetch(requestUrl, {
