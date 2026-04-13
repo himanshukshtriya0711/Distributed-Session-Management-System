@@ -52,7 +52,7 @@ if (!backendTargets.length) {
   process.exit(1);
 }
 
-const proxy = httpProxy.createProxyServer({
+const proxy=httpProxy.createProxyServer({
   changeOrigin: true,
   xfwd: true,
   timeout: proxyTimeoutMs,
