@@ -1,0 +1,2 @@
+# This repository does not use Python dependencies.
+# It is a Node.js/React project, so dependencies are managed with npm.

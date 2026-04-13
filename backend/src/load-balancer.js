@@ -35,6 +35,8 @@ const escalationResponseSlaSec = Number(process.env.ESCALATION_RESPONSE_SLA_SEC 
 const escalationResolutionSlaSec = Number(process.env.ESCALATION_RESOLUTION_SLA_SEC || 600);
 const escalationSlaBreachCooldownSec = Number(process.env.ESCALATION_SLA_BREACH_COOLDOWN_SEC || 120);
 
+
+//yeh 3 serevers hai jahn load bheja jaat hai
 const backendTargets = (process.env.BACKEND_TARGETS || "http://localhost:3001,http://localhost:3002,http://localhost:3003")
   .split(",")
   .map((target) => target.trim())
@@ -106,6 +108,9 @@ const incidentState = {
   lastNotificationAtMs: 0,
 };
 
+//Agar koi server 3 baar 
+// lagataar fail kare, toh usse automatically rotation se bahar kar deta hai (drain).
+
 const remediationState = {
   sequence: 0,
   actionCounts: {
@@ -127,6 +132,13 @@ const remediationState = {
   }])),
 };
 
+
+//Agar problem zyada serious ho jaaye toh escalation open hoti hai jisme:
+
+//Acknowledge karo
+//Owner assign karo
+//Resolve karo
+//SLA breach track hoti hai
 const escalationState = {
   sequence: 0,
   activeEscalationId: null,
