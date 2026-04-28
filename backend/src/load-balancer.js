@@ -93,11 +93,6 @@ const lbMetrics = {
 // Operational state tracks the current status of the load balancer based on defined alerts and indicators
 
 const incidentState = {
-
-
-
-
-  
   sequence: 0,
   status: "insufficient-data",
   history: [],
@@ -125,6 +120,7 @@ const remediationState = {
     autoDrains: 0,
     manualDrains: 0,
     autoRestores: 0,
+   
     manualRestores: 0,
   },
   history: [],

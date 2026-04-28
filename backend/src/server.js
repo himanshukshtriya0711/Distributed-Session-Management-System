@@ -39,9 +39,9 @@ function isOriginAllowed(requestOrigin) {
     return true;
   }
 
-  if (clientOrigins.includes("*")) {
-    return true;
-  }
+  // if (clientOrigins.includes("*")) {
+  //   return true;
+  // }
 
   if (clientOrigins.includes(requestOrigin)) {
     return true;
