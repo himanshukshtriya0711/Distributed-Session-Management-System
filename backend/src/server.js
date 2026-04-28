@@ -109,15 +109,6 @@ app.use(
   })
 );
 
-app.get("/health", (_req, res) => {
-  res.status(200).json({
-    status: "ok",
-    node: nodeName,
-    port,
-    redisConnected: redisClient.isReady,
-    timestamp: new Date().toISOString(),
-  });
-});
 
 app.get("/api/info", (_req, res) => {
   res.status(200).json({
@@ -129,6 +120,16 @@ app.get("/api/info", (_req, res) => {
     },
     node: nodeName,
     port,
+  });
+});
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({
+    status: "ok",
+    node: nodeName,
+    port,
+    redisConnected: redisClient.isReady,
+    timestamp: new Date().toISOString(),
   });
 });
 
