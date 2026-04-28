@@ -29,7 +29,7 @@
   top: -100px;
   background: radial-gradient(circle, rgba(0, 212, 255, 0.3), rgba(59, 130, 246, 0.15), transparent 70%);
 }
-
+//added like this to make the second orb different in size and color
 .page-shell::after {
   width: 450px;
   height: 450px;
