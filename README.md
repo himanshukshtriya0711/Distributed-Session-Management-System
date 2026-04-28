@@ -3,13 +3,13 @@
 This project demonstrates distributed session management where user session data is persisted in Redis and can be retrieved by any backend node.
 
 ## Architecture (Target)
-Client Browser -> Load Balancer -> Multiple Node.js Backend Servers -> Redis Session Store
+Client Browser -> Load Balancer -> Multiple Node.js Backend Servers -> Redis Session Store.
 
 ## Current Stack
 - Frontend: React (Vite)
 - Backend: Express (Node.js)
 - Session management: express-session + connect-redis
-- Session database: Redis
+- Session database: Redis.
 - Load balancing: Node.js + http-proxy (round-robin + sticky sessions)
 - Failover: health-check-driven target filtering + idempotent retry on proxy failure
 - Observability: live load balancer metrics endpoint + frontend metrics panels
@@ -17,7 +17,7 @@ Client Browser -> Load Balancer -> Multiple Node.js Backend Servers -> Redis Ses
 - Incident response: status-change timeline and webhook notification workflow
 - Automated remediation: target drain/restore controls and failure-threshold auto-drain
 - Escalation workflow: active escalation lifecycle with operator acknowledge/resolve
-- Escalation SLA and ownership: assignment handoffs and response/resolution SLA breach tracking
+- Escalation SLA and ownership: assignment handoffs and response/resolution SLA breach tracking.
 
 ## Phase Status
 - Phase 1: React + Express baseline setup
