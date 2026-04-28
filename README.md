@@ -3,27 +3,28 @@
 This project demonstrates distributed session management where user session data is persisted in Redis and can be retrieved by any backend node.
 
 ## Architecture (Target)
-Client Browser -> Load Balancer -> Multiple Node.js Backend Servers -> Redis Session Store
+Client Browser -> Load Balancer -> Multiple Node.js Backend Servers -> Redis Session Store.
 
 ## Current Stack
 - Frontend: React (Vite)
 - Backend: Express (Node.js)
 - Session management: express-session + connect-redis
-- Session database: Redis
+- Session database: Redis.
 - Load balancing: Node.js + http-proxy (round-robin + sticky sessions)
 - Failover: health-check-driven target filtering + idempotent retry on proxy failure
 - Observability: live load balancer metrics endpoint + frontend metrics panels
 - Operational alerts: threshold-based SLO indicators and alert severity reporting
 - Incident response: status-change timeline and webhook notification workflow
 - Automated remediation: target drain/restore controls and failure-threshold auto-drain
-- Escalation workflow: active escalation lifecycle with operator acknowledge/resolve
-- Escalation SLA and ownership: assignment handoffs and response/resolution SLA breach tracking
+- Escalation workflow: active escalation lifecycle with operator acknowledge/resolve.
+- Escalation SLA and ownership: assignment handoffs and response/resolution SLA breach tracking.
+
 
 ## Phase Status
-- Phase 1: React + Express baseline setup
-- Phase 2: Redis-backed session management and multi-node backend setup
-- Phase 3: Custom load balancer with round-robin and sticky sessions
-- Phase 4: Failover handling and frontend session continuity demonstration
+- Phase 1: React + Express baseline setup.
+- Phase 2: Redis-backed session management and multi-node backend setup.
+- Phase 3: Custom load balancer with round-robin and sticky sessions.
+- Phase 4: Failover handling and frontend session continuity demonstration.
 - Phase 5: Runtime observability and traffic metrics visualization
 - Phase 6: Operational alerting and SLO guardrails
 - Phase 7: Incident lifecycle tracking and operational notifications
