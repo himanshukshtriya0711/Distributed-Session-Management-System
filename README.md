@@ -16,7 +16,7 @@ Client Browser -> Load Balancer -> Multiple Node.js Backend Servers -> Redis Ses
 - Operational alerts: threshold-based SLO indicators and alert severity reporting
 - Incident response: status-change timeline and webhook notification workflow
 - Automated remediation: target drain/restore controls and failure-threshold auto-drain
-- Escalation workflow: active escalation lifecycle with operator acknowledge/resolve
+- Escalation workflow: active escalation lifecycle with operator acknowledge/resolve.
 - Escalation SLA and ownership: assignment handoffs and response/resolution SLA breach tracking.
 
 
