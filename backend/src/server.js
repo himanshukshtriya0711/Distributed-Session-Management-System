@@ -253,11 +253,11 @@ function handleLogout(req, res) {
 app.post("/login", handleLogin);
 app.post("/api/login", handleLogin);
 
-app.get("/dashboard", requireSession, handleDashboard);
-app.get("/api/dashboard", requireSession, handleDashboard);
-
 app.get("/session", handleSessionInfo);
 app.get("/api/session", handleSessionInfo);
+
+app.get("/dashboard", requireSession, handleDashboard);
+app.get("/api/dashboard", requireSession, handleDashboard);
 
 app.post("/logout", handleLogout);
 app.post("/api/logout", handleLogout);
