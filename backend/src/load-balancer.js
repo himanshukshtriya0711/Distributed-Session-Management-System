@@ -87,9 +87,17 @@ const lbMetrics = {
     lastSelectedAt: null,
     lastErrorAt: null,
   }])),
+
+  
 };
+// Operational state tracks the current status of the load balancer based on defined alerts and indicators
 
 const incidentState = {
+
+
+
+
+  
   sequence: 0,
   status: "insufficient-data",
   history: [],
