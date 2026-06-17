@@ -144,6 +144,23 @@ function handleLogin(req, res) {
     return;
   }
 
+  if (username.length > 64) {
+    res.status(400).json({
+      message: "username must be at most 64 characters",
+      node: nodeName,
+    });
+    return;
+  }
+
+  const usernamePattern = /^[a-zA-Z0-9._-]+$/;
+  if (!usernamePattern.test(username)) {
+    res.status(400).json({
+      message: "username may only contain letters, numbers, dot, underscore, and hyphen",
+      node: nodeName,
+    });
+    return;
+  }
+
   if (!req.session || typeof req.session.regenerate !== "function") {
     res.status(500).json({
       message: "Session middleware is unavailable",
