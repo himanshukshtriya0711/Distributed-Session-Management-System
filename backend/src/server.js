@@ -124,13 +124,7 @@ app.get("/api/info", (_req, res) => {
 });
 
 app.get("/health", (_req, res) => {
-  res.status(200).json({
-    status: "ok",
-    node: nodeName,
-    port,
-    redisConnected: redisClient.isReady,
-    timestamp: new Date().toISOString(),
-  });
+  res.status(200).json({ status: "healthy" });
 });
 
 function handleLogin(req, res) {

@@ -46,7 +46,7 @@ Each backend node exposes the same routes:
 - POST /logout or /api/logout
    - Destroys the session in Redis
 - GET /health
-   - Returns node and Redis connection status
+   - Returns 200 with JSON: {"status":"healthy"}
 
 ## Local Run
 1. Ensure Redis is running on redis://localhost:6379.
