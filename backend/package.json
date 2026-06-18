@@ -14,7 +14,9 @@
     "dev:node1": "cross-env PORT=3001 NODE_NAME=node-1 node --watch src/server.js",
     "dev:node2": "cross-env PORT=3002 NODE_NAME=node-2 node --watch src/server.js",
     "dev:node3": "cross-env PORT=3003 NODE_NAME=node-3 node --watch src/server.js",
-    "test": "echo \"No tests configured yet\""
+    "lint": "node --check src/server.js && node --check src/load-balancer.js",
+    "build": "node --check src/server.js && node --check src/load-balancer.js",
+    "test": "node --test tests/smoke.test.js"
   },
   "keywords": [],
   "author": "",
